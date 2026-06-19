@@ -1,0 +1,713 @@
+/* DC Transaction Viewer — DCManager "Banknote — Utility Cut" theme port.
+   Light mode only, civic-mint identity (treasury green chrome + gilt accents on cream paper).
+   No build step: pure CSS variables + a small utility layer that mirrors the shadcn surfaces
+   we actually need. Keep palette in sync with dcmanager/src/app/globals.css. */
+
+:root {
+  --background: #f1ede0;
+  --foreground: #182520;
+  --card: #fbf9f1;
+  --card-foreground: #182520;
+  --primary: #0e3424;
+  --primary-foreground: #f6f3e7;
+  --secondary: #f5f1e2;
+  --secondary-foreground: #182520;
+  --muted: #f5f1e2;
+  --muted-foreground: #5c6a5e;
+  --accent: #f3edd9;
+  --accent-foreground: #182520;
+  --destructive: #a8362a;
+  --success: #1b6e44;
+  --warning: #93680f;
+  --border: #e6dfc9;
+  --input: #d9d2bd;
+  --ring: #cda64e;
+  --brand: #1b6e44;
+  --brand-foreground: #f6f3e7;
+  --frame: #182520;
+  --gilt: #cda64e;
+  --gilt-ink: #8a7434;
+  --radius: 0.1875rem;
+
+  --font-sans: "Libre Franklin", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-display: "Cormorant Garamond", "Libre Franklin", Georgia, serif;
+
+  --shadow-overlay: 0 8px 24px -10px color-mix(in srgb, var(--frame) 30%, transparent);
+  --shadow-modal: 0 12px 32px -12px color-mix(in srgb, var(--frame) 35%, transparent);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: var(--font-sans);
+  background: var(--background);
+  color: var(--foreground);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Top chrome ─────────────────────────────────────────────────────────── */
+.chrome {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-bottom: 1px solid var(--frame);
+  position: relative;
+}
+
+.chrome::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 1px solid color-mix(in srgb, var(--gilt) 55%, transparent);
+  pointer-events: none;
+  border-radius: 2px;
+}
+
+.chrome__inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.wordmark {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+}
+
+.wordmark__main {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.4rem;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+}
+
+.wordmark__sub {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--primary-foreground) 70%, transparent);
+}
+
+.chrome__nav {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  font-size: 14px;
+}
+
+.chrome__nav a,
+.chrome__nav button {
+  color: color-mix(in srgb, var(--primary-foreground) 85%, transparent);
+  text-decoration: none;
+  background: transparent;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.chrome__nav a:hover,
+.chrome__nav button:hover {
+  color: var(--primary-foreground);
+}
+
+/* ─── Page shell ─────────────────────────────────────────────────────────── */
+.page {
+  flex: 1;
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 28px 24px 64px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+
+h1.display { font-size: 2rem; }
+h2.display { font-size: 1.5rem; }
+
+.muted {
+  color: var(--muted-foreground);
+}
+
+.small {
+  font-size: 13px;
+}
+
+.overline {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+code,
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+/* ─── Card + engraved frame (DCManager signature) ───────────────────────── */
+.card {
+  background: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--frame);
+  border-radius: var(--radius);
+  padding: 28px 32px;
+  max-width: 720px;
+  margin: 24px auto 0;
+}
+
+.engraved {
+  outline: 1px solid var(--frame);
+  outline-offset: -6px;
+}
+
+.card__head {
+  margin-bottom: 20px;
+}
+
+.card__head h1 {
+  margin-bottom: 4px;
+}
+
+/* ─── Forms ──────────────────────────────────────────────────────────────── */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.row {
+  display: flex;
+  gap: 14px;
+}
+
+.row > .field {
+  flex: 1;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field input,
+.field textarea,
+.field select {
+  font: inherit;
+  background: var(--card);
+  border: 1px solid var(--input);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  color: inherit;
+  width: 100%;
+  outline: none;
+  transition: border-color 80ms linear, box-shadow 80ms linear;
+}
+
+.field textarea {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  resize: vertical;
+  min-height: 78px;
+  line-height: 1.4;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 25%, transparent);
+}
+
+.field--compact {
+  gap: 4px;
+  min-width: 0;
+}
+
+.field--compact .overline {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* ─── Buttons ────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font: inherit;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--frame);
+  background: var(--card);
+  color: var(--foreground);
+  cursor: pointer;
+  transition: background 80ms linear, color 80ms linear;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--accent);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn--primary {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--frame);
+}
+
+.btn--primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--primary) 88%, white);
+}
+
+.btn--ghost {
+  background: transparent;
+  border-color: var(--border);
+}
+
+.btn--ghost:hover:not(:disabled) {
+  background: var(--accent);
+  border-color: var(--frame);
+}
+
+.btn--sm {
+  padding: 4px 9px;
+  font-size: 13px;
+}
+
+.link-btn {
+  background: transparent;
+  border: 0;
+  color: var(--primary);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--primary) 40%, transparent);
+  text-underline-offset: 3px;
+  padding: 4px 6px;
+}
+
+.link-btn:hover {
+  color: color-mix(in srgb, var(--primary) 85%, black);
+}
+
+/* ─── Ledger view ────────────────────────────────────────────────────────── */
+.ledger__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.ledger__title h1 {
+  margin: 0;
+}
+
+.ledger__title .muted {
+  font-size: 13px;
+}
+
+.ledger__stats {
+  display: flex;
+  gap: 24px;
+}
+
+.stat {
+  text-align: right;
+  min-width: 110px;
+}
+
+.stat .overline {
+  display: block;
+  margin-bottom: 2px;
+}
+
+.stat__value {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.toolbar__group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.toolbar__group--right {
+  margin-left: auto;
+}
+
+.sync-status {
+  font-size: 13px;
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  align-items: end;
+  margin-bottom: 12px;
+}
+
+.filter-actions {
+  display: flex;
+  align-items: flex-end;
+}
+
+.ledger-meta {
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+/* ─── Ledger table ───────────────────────────────────────────────────────── */
+.table-wrap {
+  border: 1px solid var(--frame);
+  border-radius: var(--radius);
+  background: var(--card);
+  overflow: hidden;
+}
+
+.ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.ledger-table thead th {
+  background: var(--secondary);
+  border-bottom: 1px solid var(--frame);
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.ledger-table tbody td {
+  border-bottom: 1px solid var(--border);
+  padding: 10px 12px;
+  vertical-align: top;
+}
+
+.ledger-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.ledger-table tbody tr:hover {
+  background: var(--accent);
+}
+
+.col-date { width: 170px; }
+.col-plugin { width: 110px; }
+.col-initiator { width: 200px; }
+.col-amount { width: 130px; text-align: right; }
+
+.amount {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.amount--in { color: var(--success); }
+.amount--out { color: var(--destructive); }
+
+.memo-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.memo-cell__main {
+  font-weight: 500;
+}
+
+.memo-cell__sub {
+  font-size: 12px;
+  color: var(--muted-foreground);
+  font-family: var(--font-mono);
+}
+
+.plugin-tag {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  color: var(--muted-foreground);
+}
+
+.plugin-tag--chestshop {
+  background: color-mix(in srgb, var(--gilt) 25%, var(--card));
+  color: var(--gilt-ink);
+  border-color: color-mix(in srgb, var(--gilt) 60%, transparent);
+}
+
+.plugin-tag--sweep {
+  background: color-mix(in srgb, var(--primary) 12%, var(--card));
+  color: var(--primary);
+  border-color: color-mix(in srgb, var(--primary) 40%, transparent);
+}
+
+/* Fold rows */
+.fold-row {
+  background: color-mix(in srgb, var(--secondary) 60%, transparent);
+}
+
+.fold-row:hover {
+  background: var(--accent);
+}
+
+.fold-row td.col-memo {
+  cursor: pointer;
+}
+
+.fold-row__caret {
+  display: inline-block;
+  width: 14px;
+  font-family: var(--font-mono);
+  color: var(--muted-foreground);
+  user-select: none;
+  margin-right: 6px;
+}
+
+.fold-row.expanded {
+  background: color-mix(in srgb, var(--gilt) 8%, var(--card));
+}
+
+.fold-row.expanded .fold-row__caret {
+  color: var(--gilt-ink);
+}
+
+.fold-child td:first-child {
+  padding-left: 38px;
+  position: relative;
+}
+
+.fold-child td:first-child::before {
+  content: "";
+  position: absolute;
+  left: 22px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--border);
+}
+
+.fold-child {
+  background: color-mix(in srgb, var(--secondary) 30%, transparent);
+}
+
+.empty {
+  text-align: center;
+  padding: 32px 12px;
+}
+
+/* ─── Pager ──────────────────────────────────────────────────────────────── */
+.pager {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.pager #page-info {
+  margin: 0 6px;
+  font-size: 13px;
+}
+
+.pager select {
+  margin-left: auto;
+  padding: 4px 8px;
+  border: 1px solid var(--input);
+  border-radius: var(--radius);
+  background: var(--card);
+  font: inherit;
+  font-size: 13px;
+}
+
+/* ─── Dialog ─────────────────────────────────────────────────────────────── */
+.dialog {
+  border: 1px solid var(--frame);
+  border-radius: var(--radius);
+  padding: 0;
+  background: var(--card);
+  color: var(--foreground);
+  box-shadow: var(--shadow-modal);
+  max-width: 520px;
+  width: 100%;
+}
+
+.dialog::backdrop {
+  background: color-mix(in srgb, var(--frame) 35%, transparent);
+}
+
+.dialog__form {
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog__head {
+  padding: 18px 22px 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.dialog__head h2 {
+  margin: 0 0 4px;
+}
+
+.dialog__body {
+  padding: 16px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 64vh;
+  overflow-y: auto;
+}
+
+.dialog__foot {
+  padding: 12px 22px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  background: var(--secondary);
+}
+
+/* ─── Toasts ─────────────────────────────────────────────────────────────── */
+#toast-host {
+  position: fixed;
+  bottom: 22px;
+  right: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 50;
+}
+
+.toast {
+  background: var(--card);
+  border: 1px solid var(--frame);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 14px;
+  box-shadow: var(--shadow-overlay);
+  max-width: 360px;
+  animation: toast-in 140ms ease-out;
+}
+
+.toast--success {
+  border-color: var(--success);
+}
+
+.toast--error {
+  border-color: var(--destructive);
+  color: var(--destructive);
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Progress bar (sync) ────────────────────────────────────────────────── */
+.progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.progress__bar {
+  width: 140px;
+  height: 6px;
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress__fill {
+  height: 100%;
+  background: var(--primary);
+  transition: width 80ms linear;
+}
+
+/* ─── Responsive tweaks ──────────────────────────────────────────────────── */
+@media (max-width: 720px) {
+  .page { padding: 18px 12px 40px; }
+  .ledger__stats { gap: 14px; }
+  .col-plugin, .col-initiator { display: none; }
+  .row { flex-direction: column; }
+}

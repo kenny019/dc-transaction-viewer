@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f1ede0" />
+    <title>DC Transaction Viewer — DemocracyCraft</title>
+    <meta
+      name="description"
+      content="Browse and export your DemocracyCraft business transactions. Runs entirely in your browser."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=IBM+Plex+Mono:wght@400;500;600&family=Libre+Franklin:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="chrome">
+      <div class="chrome__inner">
+        <a class="wordmark" href="./">
+          <span class="wordmark__main">DC Transaction Viewer</span>
+          <span class="wordmark__sub">DemocracyCraft</span>
+        </a>
+        <nav class="chrome__nav">
+          <a href="https://github.com/kenny019/dc-transaction-viewer" rel="noopener" target="_blank">Source</a>
+          <button type="button" id="settings-btn" class="link-btn">Settings</button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="page">
+      <!-- ─── Connect view (no key yet) ────────────────────────────────────── -->
+      <section id="connect-view" class="card engraved hidden">
+        <div class="card__head">
+          <h1 class="display">Connect an account</h1>
+          <p class="muted">
+            Paste a <strong>BUSINESS</strong> Treasury token and a firm or account id. Everything
+            stays in this browser — the token only hits
+            <code>api.democracycraft.net/economy</code>.
+          </p>
+        </div>
+        <form id="connect-form" class="form" autocomplete="off">
+          <label class="field">
+            <span class="overline">Business API token</span>
+            <textarea
+              id="connect-token"
+              rows="3"
+              spellcheck="false"
+              autocomplete="off"
+              required
+              placeholder="eyJhbGciOi…"
+            ></textarea>
+            <small id="token-hint" class="muted"></small>
+          </label>
+
+          <div class="row">
+            <label class="field flex-1">
+              <span class="overline">Firm name</span>
+              <input
+                id="connect-firm"
+                type="text"
+                spellcheck="false"
+                autocomplete="off"
+                placeholder="e.g. GemHoldings"
+              />
+              <small class="muted">Used to look up the firm's default account.</small>
+            </label>
+            <label class="field flex-1">
+              <span class="overline">Account id (optional)</span>
+              <input
+                id="connect-account"
+                type="number"
+                inputmode="numeric"
+                min="1"
+                step="1"
+                placeholder="e.g. 1042"
+              />
+              <small class="muted">Overrides the firm default. Required if no firm name.</small>
+            </label>
+          </div>
+
+          <div class="actions">
+            <button type="submit" class="btn btn--primary" id="connect-submit">
+              <span class="btn__label">Connect</span>
+            </button>
+            <button type="button" class="btn btn--ghost" id="connect-clear">Clear</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- ─── Ledger view (loaded) ─────────────────────────────────────────── -->
+      <section id="ledger-view" class="hidden">
+        <div class="ledger__head">
+          <div class="ledger__title">
+            <h1 class="display" id="ledger-firm-name">Account</h1>
+            <p class="muted" id="ledger-firm-meta"></p>
+          </div>
+          <div class="ledger__stats">
+            <div class="stat">
+              <div class="overline">Cached</div>
+              <div class="stat__value" id="stat-cached">—</div>
+            </div>
+            <div class="stat">
+              <div class="overline">Treasury total</div>
+              <div class="stat__value" id="stat-total">—</div>
+            </div>
+            <div class="stat">
+              <div class="overline">Balance</div>
+              <div class="stat__value" id="stat-balance">—</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <div class="toolbar__group">
+            <button type="button" id="sync-btn" class="btn btn--primary">Sync</button>
+            <span id="sync-status" class="sync-status muted"></span>
+          </div>
+          <div class="toolbar__group toolbar__group--right">
+            <button type="button" id="export-btn" class="btn">
+              Export CSV
+            </button>
+            <button type="button" id="export-settings-btn" class="link-btn" title="Configure account mapping">
+              Mapping
+            </button>
+          </div>
+        </div>
+
+        <div class="filters">
+          <label class="field field--compact">
+            <span class="overline">Search memo</span>
+            <input id="filter-search" type="search" placeholder="Anything…" />
+          </label>
+          <label class="field field--compact">
+            <span class="overline">From</span>
+            <input id="filter-from" type="date" />
+          </label>
+          <label class="field field--compact">
+            <span class="overline">To</span>
+            <input id="filter-to" type="date" />
+          </label>
+          <label class="field field--compact">
+            <span class="overline">Plugin</span>
+            <select id="filter-plugin">
+              <option value="">All</option>
+            </select>
+          </label>
+          <label class="field field--compact">
+            <span class="overline">Direction</span>
+            <select id="filter-direction">
+              <option value="">All</option>
+              <option value="in">In (credit)</option>
+              <option value="out">Out (debit)</option>
+            </select>
+          </label>
+          <div class="filter-actions">
+            <button type="button" id="filter-clear" class="link-btn">Clear</button>
+          </div>
+        </div>
+
+        <div class="ledger-meta">
+          <span id="row-count" class="muted">No transactions yet.</span>
+        </div>
+
+        <div class="table-wrap">
+          <table class="ledger-table" id="ledger-table">
+            <thead>
+              <tr>
+                <th class="col-date">Date</th>
+                <th class="col-memo">Memo</th>
+                <th class="col-plugin">Plugin</th>
+                <th class="col-initiator">Counterparty</th>
+                <th class="col-amount">Amount</th>
+              </tr>
+            </thead>
+            <tbody id="ledger-body">
+              <tr>
+                <td colspan="5" class="empty muted">Click <strong>Sync</strong> to fetch transactions.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <nav class="pager">
+          <button type="button" id="page-first" class="btn btn--ghost btn--sm">« First</button>
+          <button type="button" id="page-prev" class="btn btn--ghost btn--sm">‹ Prev</button>
+          <span id="page-info" class="muted"></span>
+          <button type="button" id="page-next" class="btn btn--ghost btn--sm">Next ›</button>
+          <button type="button" id="page-last" class="btn btn--ghost btn--sm">Last »</button>
+          <select id="page-size">
+            <option value="25">25 / page</option>
+            <option value="50" selected>50 / page</option>
+            <option value="100">100 / page</option>
+            <option value="200">200 / page</option>
+          </select>
+        </nav>
+      </section>
+    </main>
+
+    <!-- ─── Settings dialog ──────────────────────────────────────────────── -->
+    <dialog id="settings-dialog" class="dialog">
+      <form method="dialog" class="dialog__form">
+        <header class="dialog__head">
+          <h2 class="display">Settings</h2>
+        </header>
+        <div class="dialog__body">
+          <p class="muted small">
+            Stored in this browser only. Anyone with access to the device can read the token —
+            clear it before handing the laptop off.
+          </p>
+          <p class="muted small" id="settings-info"></p>
+          <div class="actions">
+            <button type="button" class="btn btn--ghost" id="settings-disconnect">
+              Disconnect &amp; clear cache
+            </button>
+          </div>
+        </div>
+        <footer class="dialog__foot">
+          <button type="submit" class="btn">Close</button>
+        </footer>
+      </form>
+    </dialog>
+
+    <!-- ─── Export-mapping dialog ───────────────────────────────────────── -->
+    <dialog id="mapping-dialog" class="dialog">
+      <form method="dialog" class="dialog__form">
+        <header class="dialog__head">
+          <h2 class="display">Export account mapping</h2>
+          <p class="muted small">
+            All cash legs post to <code>1050 Cash Held In-Game</code>. Pick which account each
+            other leg lands on. Matches the DCManager
+            <em>Import journal history</em> CSV shape — see the project README for codes.
+          </p>
+        </header>
+        <div class="dialog__body">
+          <div class="form">
+            <label class="field">
+              <span class="overline">ChestShop sales (credit)</span>
+              <input id="map-chestshop-in" type="text" value="4000" inputmode="numeric" />
+              <small class="muted">Default <code>4000</code> Sales Revenue. One entry per UTC day.</small>
+            </label>
+            <label class="field">
+              <span class="overline">ChestShop outflows (debit)</span>
+              <input id="map-chestshop-out" type="text" value="6400" inputmode="numeric" />
+              <small class="muted">Default <code>6400</code> Materials &amp; Supplies. One entry per UTC day.</small>
+            </label>
+            <label class="field">
+              <span class="overline">Other incoming (credit)</span>
+              <input id="map-other-in" type="text" value="4950" inputmode="numeric" />
+              <small class="muted">Default <code>4950</code> Uncategorized Income.</small>
+            </label>
+            <label class="field">
+              <span class="overline">Other outgoing (debit)</span>
+              <input id="map-other-out" type="text" value="6900" inputmode="numeric" />
+              <small class="muted">Default <code>6900</code> Uncategorized Expense.</small>
+            </label>
+            <label class="inline-toggle">
+              <input type="checkbox" id="map-skip-sweeps" checked />
+              Skip <code>dcm-sweep:</code> transfers (they belong to the bank ledger, not 1050)
+            </label>
+          </div>
+        </div>
+        <footer class="dialog__foot">
+          <button type="button" class="btn btn--ghost" id="mapping-reset">Reset defaults</button>
+          <button type="submit" class="btn btn--primary" value="save">Save</button>
+        </footer>
+      </form>
+    </dialog>
+
+    <!-- ─── Toasts ──────────────────────────────────────────────────────── -->
+    <div id="toast-host" aria-live="polite" aria-atomic="true"></div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
